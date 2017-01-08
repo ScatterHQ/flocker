@@ -55,7 +55,7 @@ Flocker is also tested using `continuous integration`_.
 .. _unittest: https://docs.python.org/2/library/unittest.html
 .. _Twisted Trial: https://twistedmatrix.com/trac/wiki/TwistedTrial
 .. _tox: https://tox.readthedocs.org/
-.. _continuous integration: http://build.clusterhq.com/
-.. _talk to us: http://flocker-docs.clusterhq.com/en/latest/gettinginvolved/contributing.html#talk-to-us
+.. _continuous integration: https://travis-ci.org/ScatterHQ/flocker
+.. _talk to us: https://scatterhq.com/
 .. _flake8: https://pypi.python.org/pypi/flake8
-.. _GitHub issue: https://github.com/clusterhq/flocker/issues
+.. _GitHub issue: https://github.com/ScatterHQ/flocker/issues
