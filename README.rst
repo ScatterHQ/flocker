@@ -49,13 +49,13 @@ You can run all of the tox environments using the command ``tox``.
 
 Flocker is also tested using `continuous integration`_.
 
-.. _ScatterHQ: https://scatterhq.com/
+.. _ScatterHQ: https://www.scatterhq.com/
 .. _Twisted: https://twistedmatrix.com/trac/
 .. _Flocker docs: https://flocker.readthedocs.io/
 .. _unittest: https://docs.python.org/2/library/unittest.html
 .. _Twisted Trial: https://twistedmatrix.com/trac/wiki/TwistedTrial
 .. _tox: https://tox.readthedocs.org/
 .. _continuous integration: https://travis-ci.org/ScatterHQ/flocker
-.. _talk to us: https://scatterhq.com/
+.. _talk to us: https://www.scatterhq.com/
 .. _flake8: https://pypi.python.org/pypi/flake8
 .. _GitHub issue: https://github.com/ScatterHQ/flocker/issues
