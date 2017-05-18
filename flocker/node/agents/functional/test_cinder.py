@@ -6,6 +6,7 @@ cluster.
 """
 
 import json
+import os
 from unittest import skipIf
 from urlparse import urlsplit
 from uuid import uuid4
@@ -1158,7 +1159,7 @@ def webserver_for_test(test, url_path, response_content):
     def _respond(request):
         return response_content
     factory = Site(app.resource())
-    endpoint = serverFromString(reactor, b"tcp:0")
+    endpoint = serverFromString(reactor, b"tcp:0:interface=127.0.0.1")
     listening = endpoint.listen(factory)
 
     def stop_port(port):
@@ -1172,6 +1173,13 @@ class MetadataFromServiceTests(AsyncTestCase):
     """
     Tests for ``metadata_from_service``.
     """
+    def setUp(self):
+        super(MetadataFromServiceTests, self).setUp()
+        if 'no_proxy' in os.environ:
+            no_proxy = set(os.environ.get('no_proxy').split(','))
+            no_proxy.update(('10.0.0.0', '127.0.0.1'))
+            os.environ['no_proxy'] = ','.join(no_proxy) 
+    
     def test_success(self):
         """
         The metadata is downloaded, decoded and returned.
