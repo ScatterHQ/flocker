@@ -18,7 +18,7 @@ attrs==16.3.0
 Babel==2.3.4
 cffi==1.9.1
 constantly==15.1.0
-cryptography==1.7.1
+cryptography==2.2.2
 docutils==0.13.1
 enum34==1.1.6
 extras==1.0.0

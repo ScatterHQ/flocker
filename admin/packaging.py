@@ -111,6 +111,7 @@ DISTRIBUTION_NAME_MAP = {
     'centos-7': Distribution(name="centos", version="7"),
     'ubuntu-14.04': Distribution(name="ubuntu", version="14.04"),
     'ubuntu-16.04': Distribution(name="ubuntu", version="16.04"),
+    'ubuntu-18.04': Distribution(name="ubuntu", version="18.04"),
 }
 
 CURRENT_DISTRIBUTION = Distribution._get_current_distribution()
@@ -591,11 +592,17 @@ IGNORED_WARNINGS = {
         'non-conffile-in-etc /etc/init/flocker-control.conf',
         'non-conffile-in-etc /etc/init/flocker-docker-plugin.conf',
 
+        # Upstart files are there for backwards compat even though
+        # we have systemd files
+        'package-installs-deprecated-upstart-configuration',
+
         # rsyslog files are not installed as conffiles.
         'non-conffile-in-etc /etc/rsyslog.d/flocker.conf',
 
         # Cryptography hazmat bindings
         'package-installs-python-pycache-dir opt/flocker/lib/python2.7/site-packages/cryptography/hazmat/bindings/__pycache__/',  # noqa
+        'embedded-library opt/flocker/lib/python2.7/site-packages/cryptography/hazmat/bindings/_openssl.so: openssl',                      # noqa
+
 
         # /opt/flocker/lib/python2.7/site-packages/sphinx/locale/.tx
         'hidden-file-or-dir',
@@ -606,6 +613,10 @@ IGNORED_WARNINGS = {
         # E.g.
         # /opt/flocker/lib/python2.7/site-packages/sphinx/locale/bn/LC_MESSAGES/sphinx.mo
         'file-not-in-%lang',
+
+        # We don't care about privacy leaks in generated files (local IPs)
+        # for now.
+        'privacy-breach-generic', # noqa
 
         # Twisted 16.6 includes an executable C source file.
         # https://twistedmatrix.com/trac/ticket/8921
@@ -620,6 +631,11 @@ IGNORED_WARNINGS = {
         # This isn't a distribution package, so the precise details of the
         # distro portion of the version don't need to be followed.
         'debian-revision-not-well-formed',
+
+        # We don't care about this error as it's always
+        # assumed that `sh` will run the postinst plus
+        # this seems to be a problem in FPM
+        'script-without-interpreter control/postinst',  # noqa
 
         # virtualenv's interpreter is correct.
         'wrong-path-for-interpreter',
@@ -677,11 +693,16 @@ IGNORED_WARNINGS = {
         'file-in-etc-not-marked-as-conffile etc/init/flocker-control.conf',
         'file-in-etc-not-marked-as-conffile etc/init/flocker-docker-plugin.conf',  # noqa
 
+        # Upstart files are there for backwards compat even though we have
+        # systemd files
+        'package-installs-deprecated-upstart-configuration',
+
         # rsyslog files are not installed as conffiles.
         'file-in-etc-not-marked-as-conffile etc/rsyslog.d/flocker.conf',
 
         # Cryptography hazmat bindings
         'package-installs-python-pycache-dir opt/flocker/lib/python2.7/site-packages/cryptography/hazmat/bindings/__pycache__/',  # noqa
+        'embedded-library opt/flocker/lib/python2.7/site-packages/cryptography/hazmat/bindings/_openssl.so: openssl',                      # noqa
 
         # files included by netaddr - we put the whole python we need in the
         # flocker package, and lint complains. See:
@@ -712,6 +733,10 @@ IGNORED_WARNINGS = {
         # https://lintian.debian.org/tags/debian-changelog-file-missing-or-wrong-name.html
         "debian-changelog-file-missing-or-wrong-name",
 
+        # FPM doesn't seem to have this patch available in latest gem
+        # https://github.com/jordansissel/fpm/issues/1398
+        'priority-extra-is-replaced-by-priority-optional', # noqa
+
         # The alabaster package contains some Google AdSense bugs.
         # https://lintian.debian.org/tags/privacy-breach-google-adsense.html
         "privacy-breach-google-adsense",
@@ -719,6 +744,10 @@ IGNORED_WARNINGS = {
         # Only occurs when building locally
         "non-standard-dir-perm",
         "non-standard-file-perm",
+
+        # We don't care about privacy leaks in generated files (local IPs)
+        # for now.
+        'privacy-breach-generic', # noqa
 
         # Sphinx 1.5.1 contains various untracked files.
         # https://github.com/sphinx-doc/sphinx/issues/3256
@@ -770,12 +799,16 @@ class LintPackage(object):
 
         output_file = self.destination_path.child(filename)
 
+        command = {
+            PackageTypes.RPM: 'rpmlint',
+            PackageTypes.DEB: 'lintian',
+        }[self.package_type]
+
+        self.output.write('Running: %s %s\n' % (command, output_file.path))
+
         try:
             check_output([
-                {
-                    PackageTypes.RPM: 'rpmlint',
-                    PackageTypes.DEB: 'lintian',
-                }[self.package_type],
+                command,
                 output_file.path,
             ])
         except CalledProcessError as e:
